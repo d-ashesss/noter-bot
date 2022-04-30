@@ -3,26 +3,37 @@ package app
 import (
 	"context"
 	"golang.org/x/sync/errgroup"
+	"gopkg.in/tucnak/telebot.v2"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
-func NewApp(config *Config) *App {
+func NewApp(config *Config) (*App, error) {
+	bot, err := telebot.NewBot(telebot.Settings{
+		Token:  config.Telegram.Token,
+		Poller: &telebot.LongPoller{Timeout: config.Telegram.LongPollerTimeout * time.Second},
+	})
+	if err != nil {
+		return nil, err
+	}
 	server := &http.Server{
 		Addr: ":" + config.Port,
 	}
 	app := &App{
 		config: config,
+		bot:    bot,
 		server: server,
 	}
-	return app
+	return app, nil
 }
 
 type App struct {
 	config *Config
+	bot    *telebot.Bot
 	server *http.Server
 }
 
@@ -33,6 +44,16 @@ func (a *App) Run(ctx context.Context) {
 
 	wg, gCtx := errgroup.WithContext(signalCtx)
 
+	wg.Go(func() error {
+		log.Printf("[app] starting telegram bot in long poller mode")
+		a.bot.Start()
+		return nil
+	})
+	wg.Go(func() error {
+		<-gCtx.Done()
+		a.bot.Stop()
+		return nil
+	})
 	wg.Go(func() error {
 		log.Printf("[app] starting http server on port %s", a.config.Port)
 		err := a.server.ListenAndServe()
