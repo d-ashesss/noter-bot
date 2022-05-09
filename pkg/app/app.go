@@ -21,7 +21,8 @@ func NewApp(config *Config) (*App, error) {
 		return nil, err
 	}
 	server := &http.Server{
-		Addr: ":" + config.Port,
+		Addr:    ":" + config.Port,
+		Handler: &serverMux,
 	}
 	app := &App{
 		config: config,
