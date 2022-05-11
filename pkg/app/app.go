@@ -52,6 +52,7 @@ func (a *App) Run(ctx context.Context) {
 	})
 	wg.Go(func() error {
 		<-gCtx.Done()
+		log.Println("[app] stopping long polling for telegram bot")
 		a.bot.Stop()
 		return nil
 	})
