@@ -29,6 +29,7 @@ func NewApp(config *Config) (*App, error) {
 		bot:    bot,
 		server: server,
 	}
+	initBotHandlers(bot, app)
 	return app, nil
 }
 
