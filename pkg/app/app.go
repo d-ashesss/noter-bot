@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"github.com/d-ashesss/noter-bot/pkg/model"
 	"golang.org/x/sync/errgroup"
 	"gopkg.in/tucnak/telebot.v2"
 	"log"
@@ -12,7 +13,7 @@ import (
 	"time"
 )
 
-func NewApp(config *Config) (*App, error) {
+func NewApp(config *Config, factory model.Factory) (*App, error) {
 	bot, err := telebot.NewBot(telebot.Settings{
 		Token:  config.Telegram.Token,
 		Poller: &telebot.LongPoller{Timeout: config.Telegram.LongPollerTimeout * time.Second},
@@ -28,6 +29,8 @@ func NewApp(config *Config) (*App, error) {
 		config: config,
 		bot:    bot,
 		server: server,
+
+		noteModel: factory.NewNoteModel(),
 	}
 	initBotHandlers(bot, app)
 	return app, nil
@@ -37,6 +40,8 @@ type App struct {
 	config *Config
 	bot    *telebot.Bot
 	server *http.Server
+
+	noteModel *model.NoteModel
 }
 
 func (a *App) Run(ctx context.Context) {
