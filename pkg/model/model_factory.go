@@ -1,6 +1,9 @@
 package model
 
-import "cloud.google.com/go/firestore"
+import (
+	"cloud.google.com/go/firestore"
+	store "github.com/d-ashesss/noter-bot/pkg/store/firestore"
+)
 
 type Factory interface {
 	NewNoteModel() *NoteModel
@@ -15,6 +18,6 @@ type FirestoreFactory struct {
 }
 
 func (f *FirestoreFactory) NewNoteModel() *NoteModel {
-	//TODO implement me
-	panic("implement me")
+	s := store.NewNoteStore(f.storeClient)
+	return NewNoteModel(s)
 }
