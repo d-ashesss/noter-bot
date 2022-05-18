@@ -1,7 +1,6 @@
 package app
 
 import (
-	"context"
 	"github.com/d-ashesss/noter-bot/pkg/model"
 	"gopkg.in/tucnak/telebot.v2"
 	"log"
@@ -13,7 +12,7 @@ func initBotHandlers(b *telebot.Bot, a *App) {
 
 func (a App) botHandleTextMessage(m *telebot.Message) {
 	n := model.NewNote(m.Sender.ID, m.Text)
-	if err := a.noteModel.Create(context.TODO(), n); err != nil {
+	if err := a.noteModel.Create(a.botCtx, n); err != nil {
 		log.Printf("[bot] failed to save note: %s", err)
 
 		if _, err := a.bot.Reply(m, "Failed to save this note 😥"); err != nil {

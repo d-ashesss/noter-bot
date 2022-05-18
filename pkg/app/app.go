@@ -28,6 +28,7 @@ func NewApp(config *Config, factory model.Factory) (*App, error) {
 	app := &App{
 		config: config,
 		bot:    bot,
+		botCtx: context.Background(),
 		server: server,
 
 		noteModel: factory.NewNoteModel(),
@@ -39,6 +40,7 @@ func NewApp(config *Config, factory model.Factory) (*App, error) {
 type App struct {
 	config *Config
 	bot    *telebot.Bot
+	botCtx context.Context
 	server *http.Server
 
 	noteModel *model.NoteModel
