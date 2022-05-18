@@ -1,10 +1,10 @@
 package app
 
 import (
+	"context"
 	"github.com/d-ashesss/noter-bot/pkg/model"
 	"gopkg.in/tucnak/telebot.v2"
 	"log"
-	"strings"
 )
 
 func initBotHandlers(b *telebot.Bot, a *App) {
@@ -12,20 +12,26 @@ func initBotHandlers(b *telebot.Bot, a *App) {
 }
 
 func (a App) botHandleTextMessage(m *telebot.Message) {
-	log.Printf("[bot] incoming message: %s: %s", getTelebotUserName(m.Sender), m.Text)
 	n := model.NewNote(m.Sender.ID, m.Text)
-	log.Printf("[bot] created new note %v", n)
-	_, err := a.bot.Send(m.Sender, n.Text)
-	if err != nil {
-		log.Printf("[bot] note response: %s", err)
-	} else {
-		_ = a.bot.Delete(m)
-	}
-}
+	if err := a.noteModel.Create(context.TODO(), n); err != nil {
+		log.Printf("[bot] failed to save note: %s", err)
 
-func getTelebotUserName(user *telebot.User) string {
-	if len(user.Username) > 0 {
-		return "@" + user.Username
+		if _, err := a.bot.Reply(m, "Failed to save this note 😥"); err != nil {
+			log.Printf("[bot] > failed to notify user: %s", err)
+		}
+		return
 	}
-	return strings.Trim(user.FirstName+" "+user.LastName, " ")
+	log.Printf("[bot] created new note %s for user %d", n.ID, n.UserID)
+	_, err := a.bot.Send(
+		m.Sender,
+		n.Text,
+		&telebot.SendOptions{ParseMode: telebot.ModeMarkdown},
+	)
+	if err != nil {
+		log.Printf("[bot] failed to display note %s: %s", n.ID, err)
+		return
+	}
+	if err := a.bot.Delete(m); err != nil {
+		log.Printf("[bot] failed to delete original for note %s: %s", n.ID, err)
+	}
 }
