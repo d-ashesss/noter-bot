@@ -3,6 +3,7 @@ package firestore
 import (
 	"cloud.google.com/go/firestore"
 	"context"
+	"errors"
 )
 
 const NoteCollection = "Notes"
@@ -24,6 +25,9 @@ func (s *NoteStore) Create(ctx context.Context, u interface{}) (string, error) {
 }
 
 func (s *NoteStore) Get(ctx context.Context, id string, u interface{}) error {
+	if id == "" {
+		return errors.New("invalid note ID")
+	}
 	snap, err := s.client.Collection(NoteCollection).Doc(id).Get(ctx)
 	if err != nil {
 		return err
@@ -35,6 +39,9 @@ func (s *NoteStore) Get(ctx context.Context, id string, u interface{}) error {
 }
 
 func (s *NoteStore) Delete(ctx context.Context, id string) error {
+	if id == "" {
+		return errors.New("invalid note ID")
+	}
 	if _, err := s.client.Collection(NoteCollection).Doc(id).Delete(ctx); err != nil {
 		return err
 	}
