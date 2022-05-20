@@ -6,8 +6,28 @@ import (
 	"log"
 )
 
+const (
+	botCmdStart = "/start"
+
+	botMessageWelcome = "*Welcome!*\n" +
+		"With this bot you will be able to save and manage your personal notes.\n" +
+		"To create a note simply send me a text message."
+	botMessageFailedToSave = "Failed to save this note 😥"
+)
+
 func initBotHandlers(b *telebot.Bot, a *App) {
+	b.Handle(botCmdStart, a.botHandleStartCommand)
 	b.Handle(telebot.OnText, a.botHandleTextMessage)
+}
+
+func (a App) botHandleStartCommand(m *telebot.Message) {
+	if _, err := a.bot.Send(
+		m.Sender,
+		botMessageWelcome,
+		&telebot.SendOptions{ParseMode: telebot.ModeMarkdown},
+	); err != nil {
+		log.Printf("[bot] failed to welcome user: %s", err)
+	}
 }
 
 func (a App) botHandleTextMessage(m *telebot.Message) {
@@ -15,7 +35,7 @@ func (a App) botHandleTextMessage(m *telebot.Message) {
 	if err := a.noteModel.Create(a.botCtx, n); err != nil {
 		log.Printf("[bot] failed to save note: %s", err)
 
-		if _, err := a.bot.Reply(m, "Failed to save this note 😥"); err != nil {
+		if _, err := a.bot.Reply(m, botMessageFailedToSave); err != nil {
 			log.Printf("[bot] > failed to notify user: %s", err)
 		}
 		return
