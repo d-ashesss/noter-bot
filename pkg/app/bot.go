@@ -25,7 +25,7 @@ func initBotHandlers(b *telebot.Bot, a *App) {
 	b.Handle(noteOptionsMenu.BtnDelete, a.botHandleCallbackNoteOptionsDelete)
 }
 
-func (a App) botHandleCallbackNoteOptionsDelete(cb *telebot.Callback) {
+func (a *App) botHandleCallbackNoteOptionsDelete(cb *telebot.Callback) {
 	log.Printf("[bot] request to delete note %q", cb.Data)
 	n, err := a.noteModel.Get(a.botCtx, cb.Data)
 	if err == nil {
@@ -44,7 +44,7 @@ func (a App) botHandleCallbackNoteOptionsDelete(cb *telebot.Callback) {
 	}
 }
 
-func (a App) botHandleStartCommand(m *telebot.Message) {
+func (a *App) botHandleStartCommand(m *telebot.Message) {
 	if _, err := a.bot.Send(
 		m.Sender,
 		botMessageWelcome,
@@ -54,7 +54,7 @@ func (a App) botHandleStartCommand(m *telebot.Message) {
 	}
 }
 
-func (a App) botHandleTextMessage(m *telebot.Message) {
+func (a *App) botHandleTextMessage(m *telebot.Message) {
 	n := model.NewNote(m.Sender.ID, m.Text)
 	if err := a.noteModel.Create(a.botCtx, n); err != nil {
 		log.Printf("[bot] failed to save note: %s", err)
