@@ -12,9 +12,9 @@ const (
 	botMessageWelcome = "*Welcome!*\n" +
 		"With this bot you will be able to save and manage your personal notes.\n" +
 		"To create a note simply send me a text message."
-	botMessageFailedToSave       = "Failed to save this note 😥"
+	botMessageFailedToSave       = "😥 Failed to save this note."
 	botMessageFailedToDeleteNote = "❗️ Failed to delete the note."
-	botMessageNoteDeleted        = "Note deleted."
+	botMessageNoteDeleted        = "✅ Note deleted."
 )
 
 func initBotHandlers(b *telebot.Bot, a *App) {
