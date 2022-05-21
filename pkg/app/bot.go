@@ -7,19 +7,19 @@ import (
 )
 
 const (
-	botCmdStart = "/start"
+	BotCommandStart = "/start"
 
-	botMessageWelcome = "*Welcome!*\n" +
+	BotMessageWelcome = "*Welcome!*\n" +
 		"With this bot you will be able to save and manage your personal notes.\n" +
 		"To create a note simply send me a text message."
-	botMessageFailedToSave       = "😥 Failed to save this note."
-	botMessageFailedToDeleteNote = "❗️ Failed to delete the note."
-	botMessageNoteDeleted        = "✅ Note deleted."
+	BotMessageNoteFailedToSave   = "😥 Failed to save this note."
+	BotMessageNoteFailedToDelete = "❗️ Failed to delete the note."
+	BotMessageNoteDeleted        = "✅ Note deleted."
 )
 
 func initBotHandlers(b *telebot.Bot, a *App) {
-	b.Handle(botCmdStart, a.botHandleStartCommand)
-	b.Handle(telebot.OnText, a.botHandleTextMessage)
+	b.Handle(BotCommandStart, a.botHandleCommandStart)
+	b.Handle(telebot.OnText, a.botHandleMessageText)
 
 	noteOptionsMenu := NewBotMenuNoteOptions("")
 	b.Handle(noteOptionsMenu.BtnDelete, a.botHandleCallbackNoteOptionsDelete)
@@ -31,35 +31,35 @@ func (a *App) botHandleCallbackNoteOptionsDelete(cb *telebot.Callback) {
 	if err == nil {
 		if err := a.noteModel.Delete(a.botCtx, n); err != nil {
 			log.Printf("[bot] failed to delete note %s: %s", n.ID, err)
-			_ = a.bot.Respond(cb, &telebot.CallbackResponse{Text: botMessageFailedToDeleteNote, ShowAlert: true})
+			_ = a.bot.Respond(cb, &telebot.CallbackResponse{Text: BotMessageNoteFailedToDelete, ShowAlert: true})
 			return
 		}
 		log.Printf("[bot] note %s was deleted", n.ID)
 	} else {
 		log.Printf("[bot] note %q was not found: %s", cb.Data, err)
 	}
-	_ = a.bot.Respond(cb, &telebot.CallbackResponse{Text: botMessageNoteDeleted})
+	_ = a.bot.Respond(cb, &telebot.CallbackResponse{Text: BotMessageNoteDeleted})
 	if err := a.bot.Delete(cb.Message); err != nil {
 		log.Printf("[bot] failed to delete message with note %s: %s", n.ID, err)
 	}
 }
 
-func (a *App) botHandleStartCommand(m *telebot.Message) {
+func (a *App) botHandleCommandStart(m *telebot.Message) {
 	if _, err := a.bot.Send(
 		m.Sender,
-		botMessageWelcome,
+		BotMessageWelcome,
 		&telebot.SendOptions{ParseMode: telebot.ModeMarkdown},
 	); err != nil {
 		log.Printf("[bot] failed to welcome user: %s", err)
 	}
 }
 
-func (a *App) botHandleTextMessage(m *telebot.Message) {
+func (a *App) botHandleMessageText(m *telebot.Message) {
 	n := model.NewNote(m.Sender.ID, m.Text)
 	if err := a.noteModel.Create(a.botCtx, n); err != nil {
 		log.Printf("[bot] failed to save note: %s", err)
 
-		if _, err := a.bot.Reply(m, botMessageFailedToSave); err != nil {
+		if _, err := a.bot.Reply(m, BotMessageNoteFailedToSave); err != nil {
 			log.Printf("[bot] > failed to notify user: %s", err)
 		}
 		return

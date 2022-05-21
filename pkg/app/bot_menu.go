@@ -3,8 +3,8 @@ package app
 import "gopkg.in/tucnak/telebot.v2"
 
 const (
-	botMenuNoteOptionsBtnDeleteLabel = "Delete"
-	botMenuNoteOptionsBtnDeleteID    = "btnMenuNoteOptionsDelete"
+	BotMenuNoteOptionsBtnDeleteLabel = "Delete"
+	BotMenuNoteOptionsBtnDeleteID    = "btnMenuNoteOptionsDelete"
 )
 
 // BotMenuNoteOptions represents Note options menu.
@@ -19,7 +19,7 @@ func NewBotMenuNoteOptions(noteID string) *BotMenuNoteOptions {
 	m := &BotMenuNoteOptions{
 		Menu: &telebot.ReplyMarkup{},
 	}
-	btnDelete := m.Menu.Data(botMenuNoteOptionsBtnDeleteLabel, botMenuNoteOptionsBtnDeleteID, noteID)
+	btnDelete := m.Menu.Data(BotMenuNoteOptionsBtnDeleteLabel, BotMenuNoteOptionsBtnDeleteID, noteID)
 	m.BtnDelete = &btnDelete
 	m.Menu.Inline(m.Menu.Row(btnDelete))
 	return m
