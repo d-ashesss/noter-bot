@@ -33,7 +33,7 @@ func NewApp(config *Config, factory model.Factory) (*App, error) {
 
 		noteModel: factory.NewNoteModel(),
 	}
-	initBotHandlers(bot, app)
+	app.RegisterBotHandlers()
 	return app, nil
 }
 

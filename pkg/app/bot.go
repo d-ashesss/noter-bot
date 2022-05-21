@@ -17,12 +17,12 @@ const (
 	BotMessageNoteDeleted        = "✅ Note deleted."
 )
 
-func initBotHandlers(b *telebot.Bot, a *App) {
-	b.Handle(BotCommandStart, a.botHandleCommandStart)
-	b.Handle(telebot.OnText, a.botHandleMessageText)
+func (a *App) RegisterBotHandlers() {
+	a.bot.Handle(BotCommandStart, a.botHandleCommandStart)
+	a.bot.Handle(telebot.OnText, a.botHandleMessageText)
 
 	noteOptionsMenu := NewBotMenuNoteOptions("")
-	b.Handle(noteOptionsMenu.BtnDelete, a.botHandleCallbackNoteOptionsDelete)
+	a.bot.Handle(noteOptionsMenu.BtnDelete, a.botHandleCallbackNoteOptionsDelete)
 }
 
 func (a *App) botHandleCallbackNoteOptionsDelete(cb *telebot.Callback) {
