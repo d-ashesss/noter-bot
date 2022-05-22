@@ -4,7 +4,7 @@ import (
 	"cloud.google.com/go/firestore"
 	"context"
 	"github.com/d-ashesss/noter-bot/pkg/app"
-	"github.com/d-ashesss/noter-bot/pkg/model"
+	store "github.com/d-ashesss/noter-bot/pkg/store/firestore"
 	"log"
 )
 
@@ -17,7 +17,7 @@ func main() {
 		log.Fatalf("[main] failed to init Firestore: %v", err)
 	}
 	defer func() { _ = storeClient.Close() }()
-	modelFactory := model.NewFirestoreFactory(storeClient)
+	modelFactory := store.NewFactory(storeClient)
 
 	a, err := app.NewApp(config, modelFactory)
 	if err != nil {
