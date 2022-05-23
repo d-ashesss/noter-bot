@@ -25,6 +25,7 @@ type NoteStore interface {
 	Create(ctx context.Context, u interface{}) (string, error)
 	Get(ctx context.Context, id string, u interface{}) error
 	Delete(ctx context.Context, id string) error
+	FindByUser(userID int64) NoteCollection
 }
 
 // NoteModel data model for Note.
@@ -56,4 +57,13 @@ func (m *NoteModel) Get(ctx context.Context, id string) (*Note, error) {
 
 func (m *NoteModel) Delete(ctx context.Context, n *Note) error {
 	return m.db.Delete(ctx, n.ID)
+}
+
+func (m *NoteModel) FindByUser(userID int64) NoteCollection {
+	c := m.db.FindByUser(userID)
+	return c
+}
+
+type NoteCollection interface {
+	All(ctx context.Context) <-chan *Note
 }

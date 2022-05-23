@@ -5,6 +5,7 @@ package mocks
 import (
 	context "context"
 
+	model "github.com/d-ashesss/noter-bot/pkg/model"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -43,6 +44,22 @@ func (_m *NoteStore) Delete(ctx context.Context, id string) error {
 		r0 = rf(ctx, id)
 	} else {
 		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// FindByUser provides a mock function with given fields: userID
+func (_m *NoteStore) FindByUser(userID int64) model.NoteCollection {
+	ret := _m.Called(userID)
+
+	var r0 model.NoteCollection
+	if rf, ok := ret.Get(0).(func(int64) model.NoteCollection); ok {
+		r0 = rf(userID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(model.NoteCollection)
+		}
 	}
 
 	return r0
