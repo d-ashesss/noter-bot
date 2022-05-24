@@ -5,6 +5,10 @@ import (
 	"fmt"
 )
 
+const (
+	NoteFieldUserID = "UserID"
+)
+
 // Note represents a category entity.
 type Note struct {
 	ID     string `firestore:"-"`
