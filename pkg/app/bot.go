@@ -56,7 +56,19 @@ func (a *App) botHandleCommandMyNotes(m *telebot.Message) {
 }
 
 func (a App) botHandleCallbackMyNotesShowAll(cb *telebot.Callback) {
-	_ = a.bot.Respond(cb, &telebot.CallbackResponse{Text: "ok"})
+	notes := a.noteModel.FindByUser(cb.Sender.ID)
+	for n := range notes.All(a.botCtx) {
+		_, err := a.bot.Send(
+			cb.Sender,
+			n.Text,
+			&telebot.SendOptions{ParseMode: telebot.ModeMarkdown},
+			NewBotMenuNoteOptions(n.ID).Menu,
+		)
+		if err != nil {
+			log.Printf("[bot] failed to display note %s: %s", n.ID, err)
+		}
+	}
+	_ = a.bot.Respond(cb)
 }
 
 func (a *App) botHandleMessageText(m *telebot.Message) {
