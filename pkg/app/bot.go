@@ -32,6 +32,8 @@ func (a *App) RegisterBotHandlers() {
 
 	myNotesMenu := NewBotMenuMyNotes()
 	a.bot.Handle(&myNotesMenu.BtnShowAll, a.botHandleCallbackMyNotesShowAll)
+	a.bot.Handle(&myNotesMenu.BtnShowFirst, a.botHandleCallbackMyNotesShowFirst)
+	a.bot.Handle(&myNotesMenu.BtnShowLast, a.botHandleCallbackMyNotesShowLast)
 }
 
 func (a *App) botHandleCommandStart(m *telebot.Message) {
@@ -71,6 +73,44 @@ func (a App) botHandleCallbackMyNotesShowAll(cb *telebot.Callback) {
 	_ = a.bot.Respond(cb)
 }
 
+func (a App) botHandleCallbackMyNotesShowFirst(cb *telebot.Callback) {
+	notes := a.noteModel.FindByUser(cb.Sender.ID)
+	n := notes.First(a.botCtx)
+	if n == nil {
+		_ = a.bot.Respond(cb, &telebot.CallbackResponse{Text: "No notes to show"})
+		return
+	}
+	_, err := a.bot.Send(
+		cb.Sender,
+		n.Text,
+		&telebot.SendOptions{ParseMode: telebot.ModeMarkdown},
+		NewBotMenuNoteOptions(n.ID).Menu,
+	)
+	if err != nil {
+		log.Printf("[bot] failed to display note %s: %s", n.ID, err)
+	}
+	_ = a.bot.Respond(cb)
+}
+
+func (a App) botHandleCallbackMyNotesShowLast(cb *telebot.Callback) {
+	notes := a.noteModel.FindByUser(cb.Sender.ID)
+	n := notes.Last(a.botCtx)
+	if n == nil {
+		_ = a.bot.Respond(cb, &telebot.CallbackResponse{Text: "No notes to show"})
+		return
+	}
+	_, err := a.bot.Send(
+		cb.Sender,
+		n.Text,
+		&telebot.SendOptions{ParseMode: telebot.ModeMarkdown},
+		NewBotMenuNoteOptions(n.ID).Menu,
+	)
+	if err != nil {
+		log.Printf("[bot] failed to display note %s: %s", n.ID, err)
+	}
+	_ = a.bot.Respond(cb)
+}
+
 func (a *App) botHandleMessageText(m *telebot.Message) {
 	n := model.NewNote(m.Sender.ID, m.Text)
 	if err := a.noteModel.Create(a.botCtx, n); err != nil {
@@ -81,7 +121,7 @@ func (a *App) botHandleMessageText(m *telebot.Message) {
 		}
 		return
 	}
-	log.Printf("[bot] created new note %s for user %d", n.ID, n.UserID)
+	log.Printf("[bot] created new note %s for user %d at %s", n.ID, n.UserID, n.Date.String())
 	_, err := a.bot.Send(
 		m.Sender,
 		n.Text,

@@ -5,6 +5,8 @@ import (
 	"context"
 	"errors"
 	"github.com/d-ashesss/noter-bot/pkg/model"
+	"google.golang.org/api/iterator"
+	"log"
 )
 
 const NoteCollectionName = "Notes"
@@ -51,7 +53,9 @@ func (s *NoteStore) Delete(ctx context.Context, id string) error {
 
 func (s *NoteStore) FindByUser(userID int64) model.NoteCollection {
 	return &NoteCollection{
-		query: s.client.Collection(NoteCollectionName).Where(model.NoteFieldUserID, "==", userID),
+		query: s.client.Collection(NoteCollectionName).
+			Where(model.NoteFieldUserID, "==", userID).
+			OrderBy(model.NoteFieldDate, firestore.Asc),
 	}
 }
 
@@ -64,6 +68,7 @@ func (c *NoteCollection) All(ctx context.Context) <-chan *model.Note {
 	iter := c.query.Documents(ctx)
 	go func() {
 		defer close(notes)
+		defer iter.Stop()
 
 		for {
 			snap, err := iter.Next()
@@ -79,4 +84,38 @@ func (c *NoteCollection) All(ctx context.Context) <-chan *model.Note {
 		}
 	}()
 	return notes
+}
+
+func (c *NoteCollection) First(ctx context.Context) *model.Note {
+	iter := c.query.Limit(1).Documents(ctx)
+	defer iter.Stop()
+	snap, err := iter.Next()
+	if err != nil {
+		if err != iterator.Done {
+			log.Printf("[firestore] failed to get first note: %s", err)
+		}
+		return nil
+	}
+	var n model.Note
+	if err := snap.DataTo(&n); err != nil {
+		return nil
+	}
+	n.ID = snap.Ref.ID
+	return &n
+}
+
+func (c *NoteCollection) Last(ctx context.Context) *model.Note {
+	iter := c.query.LimitToLast(1).Documents(ctx)
+	defer iter.Stop()
+	snaps, err := iter.GetAll()
+	if err != nil {
+		log.Printf("[firestore] failed to get last note: %s", err)
+		return nil
+	}
+	var n model.Note
+	if err := snaps[0].DataTo(&n); err != nil {
+		return nil
+	}
+	n.ID = snaps[0].Ref.ID
+	return &n
 }

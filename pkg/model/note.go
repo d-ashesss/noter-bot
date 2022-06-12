@@ -3,10 +3,12 @@ package model
 import (
 	"context"
 	"fmt"
+	"time"
 )
 
 const (
 	NoteFieldUserID = "UserID"
+	NoteFieldDate   = "Date"
 )
 
 // Note represents a category entity.
@@ -14,6 +16,7 @@ type Note struct {
 	ID     string `firestore:"-"`
 	UserID int64
 	Text   string
+	Date   time.Time
 }
 
 // NewNote initializes new Note.
@@ -21,6 +24,7 @@ func NewNote(userID int64, text string) *Note {
 	return &Note{
 		UserID: userID,
 		Text:   text,
+		Date:   time.Now(),
 	}
 }
 
@@ -70,4 +74,6 @@ func (m *NoteModel) FindByUser(userID int64) NoteCollection {
 
 type NoteCollection interface {
 	All(ctx context.Context) <-chan *Note
+	First(ctx context.Context) *Note
+	Last(ctx context.Context) *Note
 }

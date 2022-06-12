@@ -29,3 +29,35 @@ func (_m *NoteCollection) All(ctx context.Context) <-chan *model.Note {
 
 	return r0
 }
+
+// First provides a mock function with given fields: ctx
+func (_m *NoteCollection) First(ctx context.Context) *model.Note {
+	ret := _m.Called(ctx)
+
+	var r0 *model.Note
+	if rf, ok := ret.Get(0).(func(context.Context) *model.Note); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Note)
+		}
+	}
+
+	return r0
+}
+
+// Last provides a mock function with given fields: ctx
+func (_m *NoteCollection) Last(ctx context.Context) *model.Note {
+	ret := _m.Called(ctx)
+
+	var r0 *model.Note
+	if rf, ok := ret.Get(0).(func(context.Context) *model.Note); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Note)
+		}
+	}
+
+	return r0
+}
